@@ -7,9 +7,9 @@
 [![Platform](https://img.shields.io/badge/Platform-Chrome%20%7C%20Firefox%20%7C%20Edge-orange)](https://www.tampermonkey.net/)
 [![Version](https://img.shields.io/badge/Version-2.0.0-red)](https://github.com/GlacierEQ/chatgpt_infinity/releases)
 
-Advanced automation tools for AI platforms featuring intelligent drilling, auto-approval, and context-aware interactions.
+Advanced automation tools for AI platforms featuring intelligent drilling, auto-continue, and context-aware interactions.
 
-[Installation](#-installation) • [Features](#-features) • [Usage](#-usage) • [Documentation](#-documentation)
+[Installation](#-installation) • [Features](#-features) • [Scripts](#-available-scripts) • [Documentation](#-documentation)
 
 </div>
 
@@ -17,17 +17,14 @@ Advanced automation tools for AI platforms featuring intelligent drilling, auto-
 
 ## 🎯 Overview
 
-**ChatGPT Infinity** is a collection of powerful userscripts designed to supercharge your AI interactions. Currently featuring **Perplexity Auto-Driller Pro**, with more AI automation tools coming soon.
+**ChatGPT Infinity** is a comprehensive collection of powerful userscripts designed to supercharge your AI interactions across multiple platforms. Featuring intelligent drilling systems, auto-continue capabilities, and context-aware automation.
 
-### 🆕 Perplexity Auto-Driller Pro v2.0
+### 🌟 Featured Scripts
 
-Transform your Perplexity AI experience with intelligent automation:
-- ✨ **18 question patterns** across 6 intelligent categories
-- 🧠 **NLP-powered topic extraction** for contextual follow-ups
-- 🔄 **Automatic approval** of permissions and continuations
-- ⏱️ **Human-like typing** with variable speed simulation
-- 🎨 **Modern glassmorphism UI** with real-time statistics
-- 💾 **Session export** for conversation history analysis
+| Script | Platform | Status | Features |
+|--------|----------|--------|----------|
+| **[ChatGPT Auto-Driller Pro](#-chatgpt-auto-driller-pro)** | ChatGPT | ✅ v2.0 | Auto-continue, 8 categories, 40 patterns |
+| **[Perplexity Auto-Driller Pro](#-perplexity-auto-driller-pro)** | Perplexity | ✅ v2.0 | Auto-approve, 6 categories, 18 patterns |
 
 ---
 
@@ -41,405 +38,348 @@ Transform your Perplexity AI experience with intelligent automation:
    - [Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd)
    - [Safari Extension](https://apps.apple.com/app/tampermonkey/id1482490089) (Mac only)
 
-### Quick Install
+### Quick Install Links
 
-**Option 1: Direct Install** (⭐ Recommended)
+#### 🤖 ChatGPT Auto-Driller Pro
+**[📥 Click to Install ChatGPT Script](https://raw.githubusercontent.com/GlacierEQ/chatgpt_infinity/main/chatgpt-auto-driller-pro.user.js)**
 
-1. Click [**Install Perplexity Auto-Driller Pro**](https://raw.githubusercontent.com/GlacierEQ/chatgpt_infinity/main/perplexity-auto-driller-pro.user.js)
-2. Tampermonkey will detect the script automatically
-3. Click **Install** button
-4. Visit [perplexity.ai](https://www.perplexity.ai)
-
-**Option 2: Manual Install**
-
-1. Open **Tampermonkey Dashboard** (click extension icon → Dashboard)
-2. Click **"+"** icon (Create new script)
-3. Delete default template
-4. Copy content from [`perplexity-auto-driller-pro.user.js`](perplexity-auto-driller-pro.user.js)
-5. Paste into editor
-6. Press **Ctrl+S** (or Cmd+S) to save
-7. Visit [perplexity.ai](https://www.perplexity.ai)
+#### 🔍 Perplexity Auto-Driller Pro  
+**[📥 Click to Install Perplexity Script](https://raw.githubusercontent.com/GlacierEQ/chatgpt_infinity/main/perplexity-auto-driller-pro.user.js)**
 
 ---
 
-## ✨ Features
+## 🤖 ChatGPT Auto-Driller Pro
 
-### Intelligent Drilling System
+### Overview
+Transform your ChatGPT experience with intelligent automation, auto-continue, and context-aware follow-up questions.
 
-**6 Question Categories** with weighted selection:
+### ✨ Key Features
 
-| Category | Weight | Example |
-|----------|--------|----------|
-| **Clarification** | 3x | "Can you elaborate on {topic} with specific examples?" |
-| **Depth** | 2x | "What are the underlying principles behind {topic}?" |
-| **Practical** | 2x | "How can I implement {topic} in production?" |
-| **Comparative** | 1x | "How does {topic} compare to alternatives?" |
-| **Future** | 1x | "What's the future outlook for {topic}?" |
-| **Technical** | 1x | "What are best practices for {topic}?" |
+- 🔄 **Auto-Continue** - Automatically clicks "Continue generating" buttons
+- 🧠 **8 Question Categories** with 40+ intelligent patterns
+- 💡 **Intelligent Mode** - Weighted pattern selection for better questions
+- ⚡ **Real-time Topic Extraction** using advanced NLP
+- 🎨 **Modern ChatGPT-themed UI** (green gradient)
+- ⏱️ **Human-like Typing** with variable speed (20-150ms)
+- 📊 **Live Statistics** - drill count, status, uptime
+- 💾 **Session Export** - save conversation history as JSON
+- 🔧 **Fully Configurable** - depth, interval, speed controls
 
-**Smart Topic Extraction:**
-- NLP-based keyword extraction
-- Stop-word filtering (30+ common words)
-- Topic caching for performance
-- 2-3 word topic phrases
+### 🎯 Question Categories
 
-### Auto-Approval System
+| Category | Patterns | Weight | Example |
+|----------|----------|--------|----------|
+| **Clarification** | 5 | 4x | "Can you elaborate on {topic} with specific examples?" |
+| **Depth** | 5 | 3x | "What are the underlying principles behind {topic}?" |
+| **Practical** | 5 | 3x | "How can I implement {topic} in production?" |
+| **Comparative** | 5 | 2x | "How does {topic} compare to alternatives?" |
+| **Future** | 5 | 1x | "What's the future outlook for {topic}?" |
+| **Technical** | 5 | 1x | "What are best practices for {topic}?" |
+| **Problem Solving** | 5 | 1x | "What problems does {topic} solve?" |
+| **Integration** | 5 | 1x | "How does {topic} integrate with existing systems?" |
 
-**13 Button Selectors** for universal coverage:
-- `data-testid` attributes
-- `aria-label` patterns
-- Text-based matching
-- Role-based detection
-- Custom class selectors
+### 📥 Installation
 
-**Features:**
-- 300ms polling interval
-- WeakSet tracking (no memory leaks)
-- Mutation observer for dynamic content
-- Instant click on detection
+1. **Direct Install**: [Click here](https://raw.githubusercontent.com/GlacierEQ/chatgpt_infinity/main/chatgpt-auto-driller-pro.user.js)
+2. Click **Install** when Tampermonkey prompts you
+3. Visit [chatgpt.com](https://chatgpt.com) or [chat.openai.com](https://chat.openai.com)
+4. Green panel appears in top-right corner
 
-### Modern UI
+### 🎮 Usage
 
-**Glassmorphism Design:**
-- Gradient background (blue theme)
-- Backdrop blur effect
-- Smooth animations (300ms)
-- Toggle switches with slider
-- Range slider for typing speed
+#### Quick Start
+1. Ask your initial question in ChatGPT
+2. **Toggle Auto-Continue ON** (enabled by default)
+3. Wait for response
+4. **Toggle Auto-Drill ON** to start automated follow-ups
+5. Script generates intelligent questions automatically
 
-**Real-time Statistics:**
-- Drill count tracker
+#### Controls
+
+**Toggle Switches:**
+- 🔄 **Auto-Continue** - Automatically continues long responses (Default: ON)
+- 🔁 **Auto-Drill** - Generates follow-up questions (Default: OFF for safety)
+- 🧠 **Intelligent Mode** - Uses weighted pattern selection (Default: ON)
+
+**Settings:**
+- **Max Depth**: 1-50 drills (Default: 5)
+- **Interval**: 1-30 seconds (Default: 5s)
+- **Typing Speed**: 20-150ms per character (Default: 50ms)
+
+### 🎨 UI Features
+
+**ChatGPT Green Theme:**
+- Gradient: `#10a37f → #1a7f64`
+- Glassmorphism design
+- Smooth animations
+- Minimizable panel
+- Real-time stats
+
+**Statistics Display:**
+- Current drill count
 - Status messages
-- Uptime counter (minutes/seconds)
-- Session history
-
-**Control Panel:**
-- 3 toggle switches (Auto-Approve, Auto-Drill, Intelligent Mode)
-- Max depth configuration (1-50)
-- Interval adjustment (1-30s)
-- Typing speed slider (20-150ms)
+- Session uptime
 
 ---
 
-## 🎮 Usage
+## 🔍 Perplexity Auto-Driller Pro
 
-### First-Time Setup
+### Overview
+Enhance your Perplexity AI experience with auto-approval, intelligent drilling, and context-aware automation.
 
-1. **Install script** via Tampermonkey
-2. **Visit** [perplexity.ai](https://www.perplexity.ai)
-3. **Panel appears** in top-right corner (blue gradient)
-4. **Configure settings** as desired
-5. **Toggle Auto-Drill ON** to start automation
+### ✨ Key Features
 
-### Basic Operations
+- ✅ **Auto-Approve** - Automatically approves permissions and continuations
+- 🧠 **6 Question Categories** with 18 intelligent patterns
+- 🎯 **Smart Topic Extraction** with NLP and stop-word filtering
+- 🔄 **Mutation Observer** for dynamic content detection
+- 🎨 **Modern Blue-themed UI** with glassmorphism
+- ⏱️ **Human-like Typing** simulation
+- 📊 **Live Statistics** and session tracking
+- 💾 **Export Sessions** to JSON
 
-#### Auto-Approve (Default: ON)
+### 🎯 Question Categories
 
-- **Automatically clicks** permission/approval buttons
-- **Works immediately** without configuration
-- **Status updates** show when buttons are clicked
-- **Toggle off** if you want manual control
+| Category | Patterns | Weight | Example |
+|----------|----------|--------|----------|
+| **Clarification** | 3 | 3x | "Can you elaborate on {topic} with specific examples?" |
+| **Depth** | 3 | 2x | "What are the underlying principles behind {topic}?" |
+| **Practical** | 3 | 2x | "What are real-world applications of {topic}?" |
+| **Comparative** | 3 | 1x | "How does {topic} compare to similar alternatives?" |
+| **Future** | 3 | 1x | "What's the future outlook for {topic}?" |
+| **Technical** | 3 | 1x | "What are the technical specifications of {topic}?" |
 
-#### Auto-Drill (Default: OFF)
+### 📥 Installation
 
-1. **Ask initial question** in Perplexity
-2. **Toggle Auto-Drill ON** (green switch)
-3. **Wait for response** to complete
-4. **Script automatically:**
-   - Extracts main topic from response
-   - Generates intelligent follow-up question
-   - Types question with human-like speed
-   - Submits automatically
-   - Repeats until max depth reached
+1. **Direct Install**: [Click here](https://raw.githubusercontent.com/GlacierEQ/chatgpt_infinity/main/perplexity-auto-driller-pro.user.js)
+2. Click **Install** when Tampermonkey prompts you
+3. Visit [perplexity.ai](https://www.perplexity.ai)
+4. Blue panel appears in top-right corner
 
-### Configuration
+### 🎮 Usage
 
-**Default Settings:**
-```javascript
-Auto-Approve: ON
-Auto-Drill: OFF (safety)
-Max Depth: 5 drills
-Interval: 4 seconds
-Typing Speed: 50ms per character
-```
+#### Quick Start
+1. Ask your initial question in Perplexity
+2. **Auto-Approve** handles permissions automatically (ON by default)
+3. Wait for response to complete
+4. **Toggle Auto-Drill ON** to start automation
+5. Script generates contextual follow-up questions
 
-**Recommended Profiles:**
+#### Controls
 
-| Mode | Max Depth | Interval | Use Case |
-|------|-----------|----------|----------|
-| **Research** | 10+ | 5s | Deep topic exploration |
-| **Quick** | 3 | 3s | Fast overviews |
-| **Safe** | 2 | 6s | Conservative automation |
-| **Aggressive** | 20 | 2s | Maximum depth |
+**Toggle Switches:**
+- ✅ **Auto-Approve** - Auto-clicks approval buttons (Default: ON)
+- 🔁 **Auto-Drill** - Generates follow-up questions (Default: OFF)
+- 🧠 **Intelligent Mode** - Uses weighted patterns (Default: ON)
 
-### Keyboard Shortcuts
-
-**Via Tampermonkey Menu** (right-click extension icon):
-- ⚙️ **Toggle Auto-Approve** - Enable/disable auto-clicking
-- 🔄 **Toggle Auto-Drill** - Enable/disable automated questions
-- 🔍 **Toggle Debug Mode** - Show console logs
-- 🔄 **Reset Session** - Clear drill count and history
-
-### Buttons
-
-**Reset:**
-- Clears drill counter to 0
-- Wipes conversation history
-- Clears topic cache
-- Keeps configuration settings
-
-**Export:**
-- Downloads JSON file with:
-  - Drill count
-  - Conversation history
-  - Current configuration
-  - Timestamp
-- Filename: `perplexity-session-[timestamp].json`
+**Settings:**
+- **Max Depth**: 1-50 drills (Default: 5)
+- **Interval**: 1-30 seconds (Default: 4s)
+- **Typing Speed**: 20-150ms per character (Default: 50ms)
 
 ---
 
-## 📊 Technical Specifications
+## ⚙️ Configuration Profiles
+
+### Recommended Settings by Use Case
+
+| Profile | Max Depth | Interval | Use Case |
+|---------|-----------|----------|----------|
+| **🔬 Research** | 15-20 | 5-6s | Deep exploration, academic research |
+| **⚡ Quick** | 2-3 | 3s | Fast overviews, simple queries |
+| **🛡️ Safe** | 2 | 6s | Conservative, testing, rate-limit safe |
+| **🚀 Aggressive** | 20-30 | 2s | Maximum depth, powerful accounts |
+| **🎓 Learning** | 8-10 | 4s | Structured learning, tutorials |
+| **💼 Professional** | 5-7 | 4-5s | Business research, reports |
+
+---
+
+## 🛠️ Technical Specifications
 
 ### Architecture
 
-**Modular Design:**
 ```
-┌───────────────────────────┐
-│  Configuration & State   │
-└────────┬──────────────────┘
-         │
-    ┌────┼────┐
-    │    │    │
-    │    │    │
-┌───┴──┐ │ ┌─┴────────────┐
-│ Utils │ │ │ Drilling    │
-└───────┘ │ └─────────────┘
-       ┌──┼──┐
-       │  │  │
-┌──────┴─┐ │ ┌┴──────────┐
-│ DOM Ops │ │ │ Observers │
-└─────────┘ │ └───────────┘
-     ┌──────┼───────┐
-     │     UI Panel     │
-     └────────────────┘
+┌─────────────────────────────────────────┐
+│         Configuration & State           │
+└────────────────┬────────────────────────┘
+                 │
+        ┌────────┼────────┐
+        │        │        │
+    ┌───┴──┐ ┌──┴───┐ ┌──┴────────┐
+    │Utils │ │ DOM  │ │  Drilling │
+    └──────┘ └──────┘ └───────────┘
+        │        │        │
+        └────────┼────────┘
+                 │
+        ┌────────┴────────┐
+        │   UI System     │
+        └─────────────────┘
+                 │
+        ┌────────┴────────┐
+        │   Observers     │
+        └─────────────────┘
 ```
 
-### Performance
+### Performance Metrics
 
-**Metrics:**
-- **Script Size:** 33KB (minified)
-- **Lines of Code:** 913
-- **Memory Usage:** ~5MB
-- **CPU Usage:** <1% idle, <5% active
-- **Startup Time:** 1.5s delay
-- **UI Render:** <100ms
-
-**Optimization:**
-- WeakSet for button tracking (automatic GC)
-- Map-based topic caching
-- Debounced DOM queries
-- Async/await for smooth execution
-- RequestAnimationFrame for UI updates
+| Metric | ChatGPT Script | Perplexity Script |
+|--------|----------------|-------------------|
+| **File Size** | 35KB | 33KB |
+| **Lines of Code** | 940 | 913 |
+| **Memory Usage** | ~5MB | ~5MB |
+| **CPU Usage** | <1% idle | <1% idle |
+| **Startup Time** | 2s | 1.5s |
 
 ### Browser Compatibility
 
-| Browser | Version | Status |
-|---------|---------|--------|
-| Chrome | 90+ | ✅ Fully supported |
-| Firefox | 88+ | ✅ Fully supported |
-| Edge | 90+ | ✅ Fully supported |
-| Safari | 14+ | ✅ With Tampermonkey |
-| Opera | 76+ | ✅ Fully supported |
-| Brave | 1.25+ | ✅ Fully supported |
+| Browser | Version | ChatGPT | Perplexity |
+|---------|---------|---------|------------|
+| Chrome | 90+ | ✅ | ✅ |
+| Firefox | 88+ | ✅ | ✅ |
+| Edge | 90+ | ✅ | ✅ |
+| Safari | 14+ | ✅ | ✅ |
+| Opera | 76+ | ✅ | ✅ |
+| Brave | 1.25+ | ✅ | ✅ |
 
 **Mobile:**
 - ❌ iOS/iPadOS - Not supported (Apple restrictions)
-- ✅ Android - Supported with Kiwi Browser + Tampermonkey
+- ✅ Android - Use Kiwi Browser + Tampermonkey
 
 ---
 
-## 🛠️ Troubleshooting
+## 🐛 Troubleshooting
 
-### Script Not Loading
+### Common Issues
 
-**Symptoms:** No blue panel appears
-
-**Solutions:**
-1. Check Tampermonkey is enabled (green icon)
-2. Verify script has green dot (not red)
-3. Hard refresh: **Ctrl+Shift+R** (Win) or **Cmd+Shift+R** (Mac)
-4. Check URL is `https://www.perplexity.ai/*`
-5. Open console (F12) and look for errors
-
-### Auto-Drill Not Triggering
-
-**Symptoms:** No automatic questions after enabling
+#### Script Not Loading
+**Symptoms:** No panel appears
 
 **Solutions:**
-1. Verify toggle is **green** (active state)
-2. Wait for response to fully complete (no loading indicators)
-3. Check drill counter hasn't reached max depth
-4. Verify interval has passed (default 4 seconds)
-5. Enable debug mode and check console
+1. Verify Tampermonkey is enabled (green icon)
+2. Check script shows green dot in dashboard
+3. Hard refresh: **Ctrl+Shift+R** / **Cmd+Shift+R**
+4. Verify URL matches script's `@match` patterns
+5. Check console (F12) for errors
 
-### Buttons Not Clicking
-
-**Symptoms:** Approval buttons not auto-clicked
+#### Auto-Drill Not Working
+**Symptoms:** No questions after enabling
 
 **Solutions:**
-1. Check Auto-Approve toggle is **ON**
-2. Perplexity UI may have changed selectors
-3. Enable debug mode to see detection attempts
-4. Report new button patterns in Issues
+1. Ensure toggle is **green** (active)
+2. Wait for AI response to fully complete
+3. Check drill count vs max depth
+4. Verify interval has elapsed
+5. Enable debug mode for diagnostics
 
-### High CPU Usage
-
-**Symptoms:** Browser slows down
+#### High CPU/Memory Usage
+**Symptoms:** Browser becomes slow
 
 **Solutions:**
 1. Increase drill interval (5+ seconds)
-2. Reduce typing speed (increase ms value)
-3. Lower max depth (3-5 drills)
+2. Reduce max depth (3-5 drills)
+3. Increase typing speed delay
 4. Disable debug mode
-5. Close other Perplexity tabs
-
-### Panel Position Issues
-
-**Symptoms:** Panel overlaps other elements
-
-**Solutions:**
-1. Minimize panel with **−** button
-2. Edit CSS in script (line ~700)
-3. Adjust `top` and `right` values:
-   ```css
-   top: 80px;  /* Change this */
-   right: 20px; /* Or this */
-   ```
+5. Close duplicate tabs
 
 ---
 
 ## 📚 Advanced Customization
 
-### Add Custom Question Patterns
+### Adding Custom Patterns
 
-**Edit the `DRILL_PATTERNS` object:**
+**1. Edit Question Categories:**
 
 ```javascript
-DRILL_PATTERNS.custom = [
-    "Your custom question about {topic}?",
+// In DRILL_PATTERNS object, add new category:
+DRILL_PATTERNS.your_category = [
+    "Your question about {topic}?",
     "Another pattern for {topic}?",
-    "How does {topic} relate to X?"
+    "How can {topic} be optimized?"
 ];
 ```
 
-**Then update weights in `selectPattern()`:**
+**2. Update Pattern Weights:**
 
 ```javascript
-const weights = [3, 2, 2, 1, 1, 1, 1]; // Added 1 for custom
+// In selectPattern() function:
+const weights = [4, 3, 3, 2, 1, 1, 1, 1, 2]; // Added weight for new category
 ```
 
-### Modify UI Colors
+### Customizing UI Colors
 
-**Change gradient background:**
+**Change gradient themes:**
 
 ```javascript
-// Find in attachStyles() around line 700
-background: linear-gradient(135deg, #YOUR_COLOR_1 0%, #YOUR_COLOR_2 100%);
+// ChatGPT (Green):
+background: linear-gradient(135deg, #10a37f 0%, #1a7f64 100%);
+
+// Perplexity (Blue):
+background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+
+// Custom alternatives:
+// Purple: #667eea 0%, #764ba2 100%
+// Orange: #f12711 0%, #f5af19 100%
+// Pink: #ee0979 0%, #ff6a00 100%
 ```
 
-**Popular alternatives:**
-- Purple: `#667eea 0%, #764ba2 100%`
-- Green: `#11998e 0%, #38ef7d 100%`
-- Orange: `#f12711 0%, #f5af19 100%`
-- Pink: `#ee0979 0%, #ff6a00 100%`
+### Modifying Selectors
 
-### Adjust Selector Patterns
-
-**If Perplexity updates their UI:**
-
-1. Open browser DevTools (F12)
-2. Inspect the button you want to click
-3. Note its attributes (class, data-testid, aria-label)
-4. Add to appropriate selector array:
+**Update DOM selectors if UI changes:**
 
 ```javascript
-selectors.approvalButtons = [
-    'button[data-testid*="approval"]',
-    'your-new-selector-here', // Add here
-    // ... rest of selectors
+// Add new selectors to arrays:
+selectors.continueButtons = [
+    'button[class*="continue"]',
+    'your-new-selector',  // Add here
+    // ... existing selectors
 ];
-```
-
-### Export Configuration
-
-**Save current settings as default:**
-
-```javascript
-// After configuring in UI, run in console:
-console.log(JSON.stringify({
-    maxDrillDepth: CONFIG.maxDrillDepth,
-    drillInterval: CONFIG.drillInterval,
-    typingSpeed: CONFIG.typingSpeed
-}, null, 2));
-
-// Copy output and edit defaults in CONFIG object
 ```
 
 ---
 
-## 📄 API Reference
+## 📖 API Reference
 
 ### Configuration Object
 
 ```javascript
 CONFIG = {
-    enabled: Boolean,          // Master switch
-    autoApprove: Boolean,      // Auto-click buttons
+    enabled: Boolean,          // Master enable switch
+    autoContinue: Boolean,     // Auto-continue for ChatGPT
+    autoApprove: Boolean,      // Auto-approve for Perplexity
     autoDrill: Boolean,        // Auto-generate questions
-    maxDrillDepth: Number,     // Max questions (1-50)
-    drillInterval: Number,     // Milliseconds between drills
-    approveInterval: Number,   // Milliseconds between button checks
+    maxDrillDepth: Number,     // Maximum question depth (1-50)
+    drillInterval: Number,     // MS between drills
+    continueInterval: Number,  // MS between continue checks
     intelligentMode: Boolean,  // Use weighted patterns
-    typingSpeed: Number,       // Milliseconds per character
-    debug: Boolean            // Console logging
+    typingSpeed: Number,       // MS per character
+    debug: Boolean            // Enable console logging
 }
 ```
 
-### State Object
-
-```javascript
-STATE = {
-    drillCount: Number,              // Current drill number
-    isProcessing: Boolean,           // Lock flag
-    lastDrillTime: Number,           // Timestamp of last drill
-    conversationHistory: Array,      // Question history
-    topicCache: Map,                 // Topic extraction cache
-    observers: Array<MutationObserver> // DOM observers
-}
-```
-
-### Methods
+### Core Methods
 
 **Utilities:**
-- `utils.log(...args)` - Debug logging
-- `utils.sleep(ms)` - Async delay
-- `utils.randomDelay(min, max)` - Random delay
-- `utils.extractMainTopic(text)` - NLP topic extraction
-- `utils.formatTime(ms)` - Human-readable time
+```javascript
+utils.log(...args)                    // Debug logging
+utils.sleep(ms)                       // Async delay
+utils.randomDelay(min, max)           // Random delay
+utils.extractMainTopic(text)          // NLP topic extraction
+utils.formatTime(ms)                  // Format milliseconds
+```
 
 **DOM Operations:**
-- `dom.findElement(selectorArray)` - Multi-selector query
-- `dom.isVisible(element)` - Visibility check
-- `dom.waitForElement(selectors, timeout)` - Async element wait
+```javascript
+dom.findElement(selectorArray)        // Multi-selector query
+dom.isVisible(element)                // Visibility check
+dom.waitForElement(selectors, timeout) // Async wait
+```
 
 **Drilling:**
-- `drilling.generateQuestion()` - Create follow-up
-- `drilling.typeIntoInput(element, text)` - Simulate typing
-- `drilling.submit()` - Full drill cycle
-
-**UI:**
-- `ui.updateDrillCount(count)` - Update counter
-- `ui.updateStatus(message)` - Update status text
+```javascript
+drilling.generateQuestion()           // Create follow-up
+drilling.typeIntoInput(el, text)      // Simulate typing
+drilling.submit()                     // Execute drill cycle
+```
 
 ---
 
@@ -447,86 +387,75 @@ STATE = {
 
 ### v2.0.0 (December 2025)
 
-**Major Release:**
-- ✨ Complete rewrite with modular architecture
-- 🧠 Intelligent pattern categorization system
-- 🎯 Weighted pattern selection (6 categories)
-- 🔍 Advanced NLP topic extraction
-- 💾 Session export functionality
-- ⏱️ Live uptime tracking
-- 🎨 Glassmorphism UI design
-- 🔧 Improved error handling
+**🤖 ChatGPT Auto-Driller Pro:**
+- ✨ Initial release
+- 🔄 Auto-continue system
+- 🧠 8 question categories (40 patterns)
+- ⚡ Advanced topic extraction
+- 🎨 ChatGPT green theme
+- 💾 Session export
+- 📊 Live statistics
+
+**🔍 Perplexity Auto-Driller Pro:**
+- ✨ Major v2.0 rewrite
+- ✅ Enhanced auto-approve system
+- 🎯 6 categories with weighted selection
+- 🔍 Improved NLP topic extraction
+- 🎨 Glassmorphism UI redesign
 - 📈 Performance optimizations
-
-**Technical:**
-- 913 lines of code
-- 40+ selector patterns
-- 18 question templates
-- WeakSet memory management
-- Map-based caching
-- Mutation observer pattern
-
-### v1.0.0 (Initial Release)
-
-**Features:**
-- Basic auto-approval
-- Simple question generation
-- Control panel UI
-- Manual drill triggering
 
 ---
 
 ## 🚀 Roadmap
 
-### v2.1.0 (Planned)
-- [ ] ChatGPT integration
+### v2.1.0 (Q1 2025)
 - [ ] Claude integration
+- [ ] Gemini support
 - [ ] Custom prompt templates
-- [ ] Multi-language support
+- [ ] Multi-language questions
 - [ ] Voice input support
 - [ ] Mobile-optimized UI
+- [ ] Dark/light theme toggle
 
-### v3.0.0 (Future)
-- [ ] Machine learning pattern optimization
+### v3.0.0 (Q2 2025)
+- [ ] ML-based pattern optimization
 - [ ] Browser sync across devices
 - [ ] Team collaboration features
 - [ ] Analytics dashboard
 - [ ] API for external integrations
+- [ ] Plugin system for extensions
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Here's how:
+### How to Contribute
 
-### Bug Reports
-
+**Bug Reports:**
 1. Check [existing issues](https://github.com/GlacierEQ/chatgpt_infinity/issues)
-2. Create new issue with:
-   - Browser and version
+2. Create detailed bug report with:
+   - Browser & version
    - Script version
    - Steps to reproduce
-   - Console errors (if any)
+   - Console errors
    - Screenshots
 
-### Feature Requests
-
+**Feature Requests:**
 1. Open [feature request](https://github.com/GlacierEQ/chatgpt_infinity/issues/new)
 2. Describe use case
 3. Explain expected behavior
 4. Provide examples
 
-### Pull Requests
-
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature/AmazingFeature`
-3. Commit changes: `git commit -m 'Add AmazingFeature'`
-4. Push to branch: `git push origin feature/AmazingFeature`
+**Pull Requests:**
+1. Fork repository
+2. Create branch: `git checkout -b feature/YourFeature`
+3. Commit: `git commit -m 'Add YourFeature'`
+4. Push: `git push origin feature/YourFeature`
 5. Open Pull Request
 
 **Guidelines:**
 - Follow existing code style
-- Add comments for complex logic
+- Comment complex logic
 - Test thoroughly
 - Update documentation
 
@@ -534,9 +463,17 @@ Contributions are welcome! Here's how:
 
 ## 📜 License
 
-This project is licensed under the **MIT License** - see [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) file.
 
-**TL;DR:** You can use, modify, and distribute this freely, even commercially, as long as you include the original license.
+**You can:**
+- ✅ Use commercially
+- ✅ Modify
+- ✅ Distribute
+- ✅ Private use
+
+**You must:**
+- 📄 Include license
+- 📄 Include copyright
 
 ---
 
@@ -545,33 +482,51 @@ This project is licensed under the **MIT License** - see [LICENSE](LICENSE) file
 **Found this useful?**
 
 - ⭐ Star this repository
+- 🔀 Fork and customize
 - 🐛 Report bugs
-- 💡 Suggest features
+- 💡 Suggest features  
 - 👥 Share with others
 - ☕ [Buy me a coffee](https://www.buymeacoffee.com/glaciereq) (coming soon)
 
 ---
 
-## 💬 Contact
+## 📞 Contact
 
-**GitHub:** [@GlacierEQ](https://github.com/GlacierEQ)
-**Email:** glacier.equilibrium@gmail.com
-**Issues:** [Report here](https://github.com/GlacierEQ/chatgpt_infinity/issues)
+- **GitHub:** [@GlacierEQ](https://github.com/GlacierEQ)
+- **Email:** glacier.equilibrium@gmail.com
+- **Issues:** [Report here](https://github.com/GlacierEQ/chatgpt_infinity/issues)
+- **Discussions:** [Join here](https://github.com/GlacierEQ/chatgpt_infinity/discussions)
 
 ---
 
 ## ⚠️ Disclaimer
 
-This userscript is provided as-is for educational and productivity purposes. Use responsibly and in accordance with Perplexity AI's Terms of Service. The authors are not responsible for any misuse or damages.
+These userscripts are provided as-is for educational and productivity purposes. Use responsibly and in accordance with each platform's Terms of Service. The authors are not responsible for any misuse, damages, or account restrictions.
+
+**Rate Limiting:** Be mindful of API rate limits. Use conservative settings to avoid issues.
+
+---
+
+## 🌟 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=GlacierEQ/chatgpt_infinity&type=Date)](https://star-history.com/#GlacierEQ/chatgpt_infinity&Date)
 
 ---
 
 <div align="center">
 
+### 🎯 Quick Links
+
+[ChatGPT Script](https://raw.githubusercontent.com/GlacierEQ/chatgpt_infinity/main/chatgpt-auto-driller-pro.user.js) • [Perplexity Script](https://raw.githubusercontent.com/GlacierEQ/chatgpt_infinity/main/perplexity-auto-driller-pro.user.js) • [Issues](https://github.com/GlacierEQ/chatgpt_infinity/issues) • [Discussions](https://github.com/GlacierEQ/chatgpt_infinity/discussions)
+
+---
+
 **Made with ❤️ by [GlacierEQ](https://github.com/GlacierEQ)**
 
-*"Making the world a better place, one script at a time"*
+*Empowering AI interactions through intelligent automation*
 
-[Back to Top](#-chatgpt-infinity---ai-automation-scripts)
+⭐ **If you find this useful, please consider starring the repo!** ⭐
+
+[⬆ Back to Top](#-chatgpt-infinity---ai-automation-scripts)
 
 </div>
