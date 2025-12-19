@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Perplexity Auto-Driller Pro - ACTUALLY FIXED
+// @name         Perplexity Auto-Driller Pro - EMERGENCY FIX
 // @namespace    https://github.com/GlacierEQ
-// @version      3.1.0
-// @description  REALLY FIXED: Minimize works properly, Auto-Drill enabled by default. Tested for real this time.
+// @version      3.2.0
+// @description  EMERGENCY: Won't hijack your typing, minimize actually works, no crashes
 // @author       GlacierEQ Team
 // @match        https://www.perplexity.ai/*
 // @grant        GM_setValue
@@ -17,19 +17,16 @@
 (function() {
     'use strict';
 
-    /* ==========================================
-       CONFIGURATION & STATE MANAGEMENT
-       ========================================== */
     const CONFIG = {
         enabled: GM_getValue('enabled', true),
         autoApprove: GM_getValue('autoApprove', true),
-        autoDrill: GM_getValue('autoDrill', true), // 🔥 FIXED: NOW TRUE BY DEFAULT
+        autoDrill: GM_getValue('autoDrill', false), // 🔥 OFF BY DEFAULT - USER MUST ENABLE
         maxDrillDepth: GM_getValue('maxDrillDepth', 5),
-        drillInterval: GM_getValue('drillInterval', 5000),
-        approveInterval: GM_getValue('approveInterval', 200),
+        drillInterval: GM_getValue('drillInterval', 8000), // 🔥 LONGER INTERVAL
+        approveInterval: GM_getValue('approveInterval', 500), // 🔥 SLOWER
         intelligentMode: GM_getValue('intelligentMode', true),
-        typingSpeed: GM_getValue('typingSpeed', 40),
-        debug: GM_getValue('debug', true), // 🔥 ENABLE DEBUG BY DEFAULT
+        typingSpeed: GM_getValue('typingSpeed', 50),
+        debug: GM_getValue('debug', false), // 🔥 OFF BY DEFAULT
         minimized: GM_getValue('minimized', false)
     };
 
@@ -41,68 +38,34 @@
         topicCache: new Map(),
         observers: [],
         startTime: Date.now(),
-        lastResponseText: ''
+        lastResponseText: '',
+        userIsTyping: false, // 🔥 TRACK IF USER IS TYPING
+        lastUserActivity: 0
     };
 
-    // 🔥 NUCLEAR DRILL PATTERNS
     const DRILL_PATTERNS = {
         deep_analysis: [
             "What are the fundamental principles underlying {topic}?",
-            "Can you analyze {topic} from first principles?",
-            "What are the core mechanisms that make {topic} work?",
-            "How do experts think about {topic} differently than beginners?"
+            "Can you analyze {topic} from first principles?"
         ],
         practical_application: [
-            "Give me a step-by-step implementation guide for {topic}",
-            "What are 3 real-world case studies of {topic}?",
-            "How can I apply {topic} starting tomorrow?",
-            "What's the fastest path to mastering {topic}?"
+            "Give me a step-by-step guide for {topic}",
+            "What are real-world examples of {topic}?"
         ],
         comparative_analysis: [
-            "Compare {topic} to the top 3 alternatives with pros/cons",
-            "What makes {topic} superior or inferior to competing approaches?",
-            "When should I NOT use {topic}?",
-            "What's the objective truth about {topic} vs the hype?"
-        ],
-        edge_cases: [
-            "What are the edge cases and failure modes of {topic}?",
-            "What do people get wrong about {topic}?",
-            "What are the hidden complexities in {topic}?",
-            "What advanced concepts in {topic} are often overlooked?"
-        ],
-        future_trends: [
-            "What's the cutting edge of {topic} in 2025?",
-            "How will {topic} evolve in the next 5 years?",
-            "What emerging research is changing {topic}?",
-            "What are the unsolved problems in {topic}?"
+            "Compare {topic} to alternatives",
+            "What are the pros and cons of {topic}?"
         ],
         expert_insights: [
-            "What would a world-class expert say about {topic}?",
-            "What are the non-obvious insights about {topic}?",
-            "What's the 80/20 of {topic}?",
-            "What do insiders know about {topic} that outsiders don't?"
-        ],
-        technical_deep_dive: [
-            "Explain the technical architecture of {topic}",
-            "What are the performance characteristics of {topic}?",
-            "What are the scalability challenges with {topic}?",
-            "What's the best way to debug/troubleshoot {topic}?"
-        ],
-        context_expansion: [
-            "How does {topic} fit into the broader ecosystem?",
-            "What's the historical context that led to {topic}?",
-            "What adjacent topics should I learn alongside {topic}?",
-            "What are the interdisciplinary connections with {topic}?"
+            "What are non-obvious insights about {topic}?",
+            "What do experts say about {topic}?"
         ]
     };
 
-    /* ==========================================
-       UTILITY FUNCTIONS
-       ========================================== */
     const utils = {
         log: (...args) => {
             if (CONFIG.debug) {
-                console.log('[🔥 NUCLEAR DRILLER]', new Date().toISOString(), ...args);
+                console.log('[🔥 DRILLER]', ...args);
             }
         },
 
@@ -117,137 +80,53 @@
         },
 
         extractMainTopic: (text) => {
-            if (STATE.topicCache.has(text)) {
-                return STATE.topicCache.get(text);
-            }
-
-            const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 20);
-            if (sentences.length === 0) return 'this topic';
-
-            const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'were', 'been', 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'can', 'this', 'that', 'these', 'those', 'it', 'its', 'they', 'them', 'their', 'about', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'between', 'under', 'again', 'further', 'then', 'once']);
-
-            const allWords = text
+            if (!text || text.length < 20) return 'this topic';
+            
+            const words = text
                 .toLowerCase()
                 .replace(/[^a-z0-9\s]/g, '')
                 .split(/\s+/)
-                .filter(w => w.length > 3 && !stopWords.has(w));
-
-            const wordFreq = {};
-            allWords.forEach(word => {
-                wordFreq[word] = (wordFreq[word] || 0) + 1;
-            });
-
-            const topWords = Object.entries(wordFreq)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 3)
-                .map(entry => entry[0]);
-
-            const topic = topWords.join(' ') || 'this topic';
-            STATE.topicCache.set(text, topic);
-            return topic;
+                .filter(w => w.length > 4)
+                .slice(0, 5);
+            
+            return words.slice(0, 2).join(' ') || 'this topic';
         },
 
         formatTime: (ms) => {
             const seconds = Math.floor(ms / 1000);
             const minutes = Math.floor(seconds / 60);
-            const hours = Math.floor(minutes / 60);
-            if (hours > 0) {
-                return `${hours}h ${minutes % 60}m`;
-            }
-            if (minutes > 0) {
-                return `${minutes}m ${seconds % 60}s`;
-            }
+            if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
             return `${seconds}s`;
         }
     };
 
-    /* ==========================================
-       DOM SELECTORS
-       ========================================== */
     const selectors = {
         approvalButtons: [
-            'button[data-testid*="approval"]',
-            'button[data-testid*="continue"]',
-            'button[data-testid*="accept"]',
-            'button[data-testid*="allow"]',
-            'button[data-testid*="proceed"]',
             'button[aria-label*="pprove" i]',
             'button[aria-label*="ontinue" i]',
-            'button[aria-label*="llow" i]',
-            'button[aria-label*="ccept" i]',
-            'button[aria-label*="roceed" i]',
-            'button[aria-label*="yes" i]',
             'button:has-text("Approve")',
-            'button:has-text("Continue")',
-            'button:has-text("Yes")',
-            'button:has-text("Allow")',
-            'button:has-text("Accept")',
-            'button:has-text("Proceed")',
-            'button:has-text("OK")',
-            'button:has-text("Confirm")',
-            '[role="button"][aria-label*="continue" i]',
-            '[role="button"][aria-label*="approve" i]',
-            '.approval-btn',
-            '.continue-btn',
-            '.accept-btn',
-            'button.primary',
-            'button.confirm'
+            'button:has-text("Continue")'
         ],
 
         textInput: [
             'textarea[placeholder*="Ask" i]',
-            'textarea[placeholder*="Follow" i]',
-            'textarea[placeholder*="Question" i]',
-            'textarea[placeholder*="search" i]',
-            'textarea[data-testid="search-box"]',
-            'textarea[name="query"]',
-            'textarea.search-input',
-            'textarea[aria-label*="search" i]',
-            'textarea[role="textbox"]',
-            'div[contenteditable="true"][role="textbox"]',
-            'div[contenteditable="true"]',
-            'input[type="text"][placeholder*="Ask" i]',
-            'input[type="text"][placeholder*="search" i]'
+            'textarea[role="textbox"]'
         ],
 
         submitButton: [
             'button[type="submit"]',
-            'button[aria-label*="Submit" i]',
-            'button[aria-label*="Send" i]',
-            'button[aria-label*="Search" i]',
-            'button[data-testid="submit"]',
-            'button[data-testid="send"]',
-            'button:has(svg[class*="send"])',
-            'button:has(svg[class*="arrow"])',
-            'button:has(svg[data-icon="send"])',
-            '[role="button"][aria-label*="send" i]',
-            '.submit-button',
-            '.send-button'
+            'button[aria-label*="Submit" i]'
         ],
 
         responseContent: [
             '[class*="answer"]',
             '[class*="response"]',
-            '[class*="message-content"]',
-            '[data-testid*="answer"]',
-            '[data-testid*="response"]',
-            'main [class*="prose"]',
-            'article',
-            '.copilot-answer',
-            '.ai-response',
-            '[role="article"]'
+            'article'
         ],
 
         loadingIndicators: [
-            '[class*="loading"]',
-            '[class*="generating"]',
-            '[class*="thinking"]',
-            '[class*="typing"]',
             '[aria-busy="true"]',
-            '[data-loading="true"]',
-            '.loading-spinner',
-            '.dots-loading',
-            'svg.animate-spin'
+            '[class*="loading"]'
         ]
     };
 
@@ -255,42 +134,25 @@
         findElement: (selectorArray) => {
             for (const selector of selectorArray) {
                 try {
-                    let element;
-
                     if (selector.includes(':has-text')) {
                         const match = selector.match(/^(.+?):has-text\("(.+?)"\)$/);
                         if (match) {
                             const [, baseSelector, text] = match;
                             const elements = document.querySelectorAll(baseSelector);
-                            element = Array.from(elements).find(el => 
+                            const element = Array.from(elements).find(el => 
                                 el.textContent.trim().toLowerCase().includes(text.toLowerCase())
                             );
+                            if (element && dom.isVisible(element)) return element;
                         }
                     } else {
-                        element = document.querySelector(selector);
+                        const element = document.querySelector(selector);
+                        if (element && dom.isVisible(element)) return element;
                     }
-
-                    if (element && dom.isVisible(element)) {
-                        return element;
-                    }
-                } catch (e) {
-                    // Silently continue
-                }
-            }
-            return null;
-        },
-
-        findAllElements: (selectorArray) => {
-            const elements = [];
-            for (const selector of selectorArray) {
-                try {
-                    const found = document.querySelectorAll(selector);
-                    elements.push(...Array.from(found).filter(el => dom.isVisible(el)));
                 } catch (e) {
                     // Continue
                 }
             }
-            return elements;
+            return null;
         },
 
         isVisible: (element) => {
@@ -299,84 +161,47 @@
             return element.offsetParent !== null && 
                    !element.disabled &&
                    style.display !== 'none' &&
-                   style.visibility !== 'hidden' &&
-                   style.opacity !== '0';
+                   style.visibility !== 'hidden';
         },
 
-        waitForElement: async (selectorArray, timeout = 5000) => {
+        waitForElement: async (selectorArray, timeout = 3000) => {
             const startTime = Date.now();
             while (Date.now() - startTime < timeout) {
                 const element = dom.findElement(selectorArray);
                 if (element) return element;
-                await utils.sleep(100);
+                await utils.sleep(200);
             }
             return null;
         }
     };
 
-    /* ==========================================
-       AUTO-APPROVAL SYSTEM
-       ========================================== */
     const autoApprove = {
         clickedButtons: new WeakSet(),
-        lastCheckTime: 0,
-        checkInterval: 150,
 
         execute: () => {
-            if (!CONFIG.autoApprove) return 0;
+            if (!CONFIG.autoApprove) return;
 
-            const now = Date.now();
-            if (now - autoApprove.lastCheckTime < autoApprove.checkInterval) {
-                return 0;
+            const approveBtn = dom.findElement(selectors.approvalButtons);
+            if (approveBtn && !autoApprove.clickedButtons.has(approveBtn)) {
+                utils.log('Clicking approval button');
+                approveBtn.click();
+                autoApprove.clickedButtons.add(approveBtn);
+                ui.updateStatus('✅ Approved');
             }
-            autoApprove.lastCheckTime = now;
-
-            const buttons = dom.findAllElements(selectors.approvalButtons);
-
-            let clickCount = 0;
-            buttons.forEach(button => {
-                if (!autoApprove.clickedButtons.has(button)) {
-                    try {
-                        utils.log('🔥 CLICKING APPROVAL:', button.textContent.trim());
-                        button.click();
-                        autoApprove.clickedButtons.add(button);
-                        clickCount++;
-                        ui.updateStatus(`✅ Approved (${clickCount})`);
-                    } catch (e) {
-                        utils.log('Click error:', e);
-                    }
-                }
-            });
-
-            return clickCount;
-        },
-
-        start: () => {
-            setInterval(autoApprove.execute, CONFIG.approveInterval);
-            utils.log('🔥 Auto-approval system started');
         }
     };
 
-    /* ==========================================
-       INTELLIGENT DRILLING SYSTEM
-       ========================================== */
     const drilling = {
         getResponseText: () => {
-            const contentEls = dom.findAllElements(selectors.responseContent);
-            if (contentEls.length === 0) return '';
-
-            const latestContent = contentEls[contentEls.length - 1];
-            const text = latestContent.textContent.trim();
-
+            const el = dom.findElement(selectors.responseContent);
+            if (!el) return '';
+            const text = el.textContent.trim();
             return text.length > 50 ? text : '';
         },
 
         isResponseComplete: () => {
-            const loadingEls = document.querySelectorAll(
-                selectors.loadingIndicators.join(', ')
-            );
-            const isLoading = Array.from(loadingEls).some(el => dom.isVisible(el));
-            return !isLoading;
+            const loading = document.querySelector('[aria-busy="true"]');
+            return !loading;
         },
 
         hasNewResponse: () => {
@@ -384,198 +209,117 @@
             const hasNew = currentText !== STATE.lastResponseText && currentText.length > 0;
             if (hasNew) {
                 STATE.lastResponseText = currentText;
-                utils.log('🔥 NEW RESPONSE DETECTED:', currentText.substring(0, 100) + '...');
+                utils.log('New response detected');
             }
             return hasNew;
         },
 
-        selectIntelligentPattern: () => {
-            const categories = Object.keys(DRILL_PATTERNS);
-            const usedCategories = STATE.conversationHistory
-                .slice(-3)
-                .map(h => h.category);
-
-            const availableCategories = categories.filter(
-                cat => !usedCategories.includes(cat)
-            );
-
-            const selectedCategory = availableCategories.length > 0
-                ? availableCategories[Math.floor(Math.random() * availableCategories.length)]
-                : categories[Math.floor(Math.random() * categories.length)];
-
-            const patterns = DRILL_PATTERNS[selectedCategory];
-            const pattern = patterns[Math.floor(Math.random() * patterns.length)];
-
-            utils.log(`🔥 Selected category: ${selectedCategory}`);
-            return { pattern, category: selectedCategory };
-        },
-
         generateQuestion: () => {
             const responseText = drilling.getResponseText();
-            if (!responseText) {
-                return { question: "Can you provide more details about that?", category: 'general' };
-            }
+            if (!responseText) return "Tell me more about that";
 
             const topic = utils.extractMainTopic(responseText);
-            const { pattern, category } = drilling.selectIntelligentPattern();
-            const question = pattern.replace('{topic}', topic);
-
-            STATE.conversationHistory.push({
-                timestamp: Date.now(),
-                topic,
-                category,
-                question
-            });
-
-            if (STATE.conversationHistory.length > 50) {
-                STATE.conversationHistory = STATE.conversationHistory.slice(-25);
-            }
-
-            utils.log('🔥 Generated question:', question);
-            return { question, category };
+            const categories = Object.keys(DRILL_PATTERNS);
+            const category = categories[Math.floor(Math.random() * categories.length)];
+            const patterns = DRILL_PATTERNS[category];
+            const pattern = patterns[Math.floor(Math.random() * patterns.length)];
+            
+            return pattern.replace('{topic}', topic);
         },
 
-        typeIntoInput: async (element, text) => {
-            element.focus();
-            await utils.sleep(100);
-
-            const isContentEditable = element.contentEditable === 'true';
-
-            if (isContentEditable) {
-                element.textContent = '';
-            } else {
-                element.value = '';
+        checkUserActivity: () => {
+            const now = Date.now();
+            // 🔥 IF USER TYPED IN LAST 10 SECONDS, DON'T DRILL
+            if (now - STATE.lastUserActivity < 10000) {
+                utils.log('User is active, skipping drill');
+                return false;
             }
-
-            for (let i = 0; i < text.length; i++) {
-                const char = text[i];
-
-                if (isContentEditable) {
-                    element.textContent += char;
-                } else {
-                    element.value += char;
-                }
-
-                element.dispatchEvent(new Event('input', { bubbles: true }));
-                element.dispatchEvent(new Event('change', { bubbles: true }));
-                element.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: char }));
-                element.dispatchEvent(new KeyboardEvent('keypress', { bubbles: true, key: char }));
-                element.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: char }));
-
-                const delay = utils.randomDelay(
-                    CONFIG.typingSpeed - 20,
-                    CONFIG.typingSpeed + 30
-                );
-                await utils.sleep(delay);
-            }
-
-            element.dispatchEvent(new Event('input', { bubbles: true }));
-            element.dispatchEvent(new Event('change', { bubbles: true }));
-            await utils.sleep(200);
+            return true;
         },
 
         submit: async () => {
-            if (STATE.isProcessing) {
-                utils.log('🔥 Already processing, skipping');
-                return false;
-            }
-
+            // 🔥 SAFETY CHECKS
+            if (!CONFIG.autoDrill) return false;
+            if (STATE.isProcessing) return false;
             if (STATE.drillCount >= CONFIG.maxDrillDepth) {
-                utils.log('🔥 Max depth reached');
-                ui.updateStatus(`🛑 Max depth (${CONFIG.maxDrillDepth})`);
+                utils.log('Max depth reached');
                 return false;
             }
 
             const now = Date.now();
-            if (now - STATE.lastDrillTime < CONFIG.drillInterval) {
-                const remaining = Math.ceil((CONFIG.drillInterval - (now - STATE.lastDrillTime)) / 1000);
-                utils.log(`🔥 Cooldown active: ${remaining}s remaining`);
-                return false;
-            }
-
-            if (!drilling.isResponseComplete()) {
-                utils.log('🔥 Response not complete yet');
-                return false;
-            }
-
-            if (!drilling.hasNewResponse()) {
-                utils.log('🔥 No new response to drill into');
-                return false;
-            }
+            if (now - STATE.lastDrillTime < CONFIG.drillInterval) return false;
+            if (!drilling.isResponseComplete()) return false;
+            if (!drilling.hasNewResponse()) return false;
+            if (!drilling.checkUserActivity()) return false; // 🔥 CHECK USER ACTIVITY
 
             STATE.isProcessing = true;
             ui.updateStatus('🔄 Processing...');
 
             try {
-                const input = await dom.waitForElement(selectors.textInput, 3000);
+                await utils.sleep(1000); // 🔥 WAIT BEFORE DOING ANYTHING
+
+                const input = await dom.waitForElement(selectors.textInput, 2000);
                 if (!input) {
-                    utils.log('🔥 Input field not found');
-                    ui.updateStatus('❌ Input not found');
+                    utils.log('Input not found');
                     return false;
                 }
 
-                const { question, category } = drilling.generateQuestion();
-                ui.updateStatus(`⌨️ Typing (${category})...`);
-                await drilling.typeIntoInput(input, question);
+                // 🔥 CHECK IF INPUT HAS TEXT (USER MIGHT BE TYPING)
+                if (input.value && input.value.length > 0) {
+                    utils.log('Input has text, user might be typing');
+                    return false;
+                }
 
-                await utils.sleep(utils.randomDelay(300, 700));
+                const question = drilling.generateQuestion();
+                utils.log('Typing question:', question);
+                ui.updateStatus('⌨️ Typing...');
+
+                input.focus();
+                await utils.sleep(300);
+                input.value = question;
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                await utils.sleep(500);
 
                 const submitBtn = dom.findElement(selectors.submitButton);
                 if (!submitBtn) {
-                    utils.log('🔥 Submit button not found');
-                    ui.updateStatus('❌ Submit button not found');
+                    utils.log('Submit button not found');
                     return false;
                 }
 
-                utils.log('🔥 Clicking submit button');
                 submitBtn.click();
                 
                 STATE.drillCount++;
                 STATE.lastDrillTime = now;
-
                 ui.updateDrillCount(STATE.drillCount);
-                ui.updateStatus(`🚀 Drill ${STATE.drillCount} submitted!`);
-                utils.log(`🔥 DRILL #${STATE.drillCount} SUBMITTED:`, question);
+                ui.updateStatus(`🚀 Drill ${STATE.drillCount} sent`);
+                utils.log('Drill submitted:', question);
 
                 return true;
 
             } catch (error) {
-                utils.log('🔥 ERROR during drilling:', error);
-                ui.updateStatus('❌ Error: ' + error.message);
+                utils.log('Error:', error);
+                ui.updateStatus('❌ Error');
                 return false;
             } finally {
                 STATE.isProcessing = false;
             }
-        },
-
-        start: () => {
-            setInterval(async () => {
-                if (CONFIG.autoDrill) {
-                    await drilling.submit();
-                }
-            }, CONFIG.drillInterval);
-            utils.log('🔥 Intelligent drilling system started');
         }
     };
 
-    /* ==========================================
-       UI SYSTEM
-       ========================================== */
     const ui = {
         panel: null,
 
         create: () => {
             const panel = document.createElement('div');
-            panel.id = 'perplexity-auto-driller-pro';
-            panel.className = CONFIG.minimized ? 'panel-minimized' : '';
+            panel.id = 'driller-panel';
             panel.innerHTML = `
-                <div class="panel-header">
+                <div class="panel-header" id="panel-header">
                     <div class="panel-title">
                         <span class="icon">🔥</span>
-                        <span>NUCLEAR Driller</span>
-                        <span class="version">v3.1</span>
+                        <span>Driller</span>
+                        <span class="version">v3.2</span>
                     </div>
-                    <button class="minimize-btn" id="minimize-btn">${CONFIG.minimized ? '+' : '−'}</button>
+                    <button class="minimize-btn" id="minimize-btn">−</button>
                 </div>
                 <div class="panel-content" id="panel-content">
                     <div class="control-section">
@@ -591,49 +335,35 @@
                                 <div class="toggle-slider"></div>
                             </div>
                         </div>
-                        <div class="control-row">
-                            <span class="label">🧠 Intelligent Mode</span>
-                            <div class="toggle ${CONFIG.intelligentMode ? 'active' : ''}" data-setting="intelligentMode">
-                                <div class="toggle-slider"></div>
-                            </div>
-                        </div>
                     </div>
 
                     <div class="settings-section">
                         <div class="setting-row">
                             <label>Max Depth</label>
-                            <input type="number" id="max-depth" value="${CONFIG.maxDrillDepth}" min="1" max="50">
+                            <input type="number" id="max-depth" value="${CONFIG.maxDrillDepth}" min="1" max="10">
                         </div>
                         <div class="setting-row">
                             <label>Interval (s)</label>
-                            <input type="number" id="interval" value="${CONFIG.drillInterval / 1000}" min="1" max="30" step="0.5">
-                        </div>
-                        <div class="setting-row">
-                            <label>Typing Speed</label>
-                            <input type="range" id="typing-speed" value="${CONFIG.typingSpeed}" min="20" max="150">
-                            <span class="range-value">${CONFIG.typingSpeed}ms</span>
+                            <input type="number" id="interval" value="${CONFIG.drillInterval / 1000}" min="5" max="30">
                         </div>
                     </div>
 
                     <div class="stats-section">
                         <div class="stat-item">
-                            <span class="stat-label">🎯 Drills:</span>
-                            <span class="stat-value" id="drill-count">0</span>
+                            <span>🎯 Drills:</span>
+                            <span id="drill-count">0</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-label">📊 Status:</span>
-                            <span class="stat-value" id="status">Idle</span>
+                            <span>📊 Status:</span>
+                            <span id="status">Idle</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-label">⏱️ Uptime:</span>
-                            <span class="stat-value" id="uptime">0s</span>
+                            <span>⏱️ Uptime:</span>
+                            <span id="uptime">0s</span>
                         </div>
                     </div>
 
-                    <div class="button-section">
-                        <button class="btn btn-primary" id="reset-btn">🔄 Reset</button>
-                        <button class="btn btn-secondary" id="export-btn">💾 Export</button>
-                    </div>
+                    <button class="btn btn-reset" id="reset-btn">🔄 Reset</button>
                 </div>
             `;
 
@@ -641,366 +371,262 @@
             ui.panel = panel;
             ui.attachStyles();
             ui.attachEventListeners();
+            ui.applyMinimizeState();
             ui.startUptimeCounter();
-            ui.applyMinimizeState(); // 🔥 APPLY INITIAL STATE
         },
 
         applyMinimizeState: () => {
             const content = document.getElementById('panel-content');
-            const panel = document.getElementById('perplexity-auto-driller-pro');
+            const btn = document.getElementById('minimize-btn');
             
             if (CONFIG.minimized) {
                 content.style.display = 'none';
-                panel.classList.add('panel-minimized');
+                btn.textContent = '+';
             } else {
                 content.style.display = 'block';
-                panel.classList.remove('panel-minimized');
+                btn.textContent = '−';
             }
         },
 
         attachStyles: () => {
             GM_addStyle(`
-                #perplexity-auto-driller-pro {
+                #driller-panel {
                     position: fixed;
-                    top: 80px;
+                    top: 20px;
                     right: 20px;
-                    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 50%, #c44569 100%);
-                    border-radius: 16px;
-                    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 30px rgba(255,107,107,0.3);
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    border-radius: 12px;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
                     z-index: 999999;
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                    font-family: -apple-system, sans-serif;
                     color: white;
-                    width: 360px;
-                    backdrop-filter: blur(10px);
-                    border: 2px solid rgba(255,255,255,0.2);
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                }
-
-                #perplexity-auto-driller-pro:hover {
-                    box-shadow: 0 25px 80px rgba(0,0,0,0.6), 0 0 40px rgba(255,107,107,0.5);
-                    transform: translateY(-2px);
+                    width: 320px;
                 }
 
                 .panel-header {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    padding: 18px 24px;
-                    border-bottom: 2px solid rgba(255,255,255,0.15);
-                    background: rgba(0,0,0,0.15);
-                    border-radius: 14px 14px 0 0;
+                    padding: 16px;
+                    border-bottom: 1px solid rgba(255,255,255,0.2);
+                    cursor: move;
                 }
 
                 .panel-title {
                     display: flex;
                     align-items: center;
-                    gap: 10px;
-                    font-weight: 700;
-                    font-size: 17px;
-                    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                    gap: 8px;
+                    font-weight: 600;
+                    font-size: 16px;
                 }
 
                 .icon {
-                    font-size: 22px;
-                    animation: pulse 2s infinite;
-                }
-
-                @keyframes pulse {
-                    0%, 100% { transform: scale(1); }
-                    50% { transform: scale(1.1); }
+                    font-size: 20px;
                 }
 
                 .version {
-                    font-size: 11px;
-                    background: rgba(255,255,255,0.25);
-                    padding: 3px 8px;
-                    border-radius: 6px;
-                    font-weight: 600;
-                    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+                    font-size: 10px;
+                    background: rgba(255,255,255,0.2);
+                    padding: 2px 6px;
+                    border-radius: 4px;
                 }
 
                 .minimize-btn {
-                    background: rgba(255,255,255,0.15);
-                    border: 1px solid rgba(255,255,255,0.25);
+                    background: rgba(255,255,255,0.2);
+                    border: none;
                     color: white;
-                    font-size: 24px;
+                    font-size: 20px;
                     cursor: pointer;
-                    width: 36px;
-                    height: 36px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    border-radius: 8px;
-                    transition: all 0.2s;
-                    font-weight: 300;
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 6px;
                     line-height: 1;
+                    padding: 0;
                 }
 
                 .minimize-btn:hover {
-                    background: rgba(255,255,255,0.25);
-                    transform: scale(1.05);
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                    background: rgba(255,255,255,0.3);
                 }
 
                 .panel-content {
-                    padding: 20px;
-                    max-height: 600px;
-                    overflow-y: auto;
-                }
-
-                .panel-content::-webkit-scrollbar {
-                    width: 8px;
-                }
-
-                .panel-content::-webkit-scrollbar-track {
-                    background: rgba(0,0,0,0.2);
-                    border-radius: 4px;
-                }
-
-                .panel-content::-webkit-scrollbar-thumb {
-                    background: rgba(255,255,255,0.3);
-                    border-radius: 4px;
+                    padding: 16px;
                 }
 
                 .control-section, .settings-section, .stats-section {
-                    margin-bottom: 20px;
+                    margin-bottom: 16px;
                 }
 
                 .control-row, .setting-row {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    padding: 14px 16px;
+                    padding: 12px;
                     background: rgba(0,0,0,0.15);
-                    border-radius: 10px;
-                    margin-bottom: 10px;
-                    transition: background 0.2s;
-                }
-
-                .control-row:hover, .setting-row:hover {
-                    background: rgba(0,0,0,0.25);
+                    border-radius: 8px;
+                    margin-bottom: 8px;
                 }
 
                 .label {
                     font-size: 14px;
-                    font-weight: 600;
-                    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+                    font-weight: 500;
                 }
 
                 .toggle {
                     position: relative;
-                    width: 56px;
-                    height: 30px;
+                    width: 48px;
+                    height: 26px;
                     background: rgba(0,0,0,0.3);
-                    border-radius: 15px;
+                    border-radius: 13px;
                     cursor: pointer;
-                    transition: all 0.3s;
-                    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
                 }
 
                 .toggle.active {
                     background: #10b981;
-                    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), 0 0 15px rgba(16,185,129,0.5);
                 }
 
                 .toggle-slider {
                     position: absolute;
                     top: 3px;
                     left: 3px;
-                    width: 24px;
-                    height: 24px;
+                    width: 20px;
+                    height: 20px;
                     background: white;
                     border-radius: 50%;
-                    transition: transform 0.3s;
-                    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                    transition: transform 0.2s;
                 }
 
                 .toggle.active .toggle-slider {
-                    transform: translateX(26px);
+                    transform: translateX(22px);
                 }
 
-                input[type="number"], input[type="range"] {
+                input[type="number"] {
                     background: rgba(0,0,0,0.2);
                     border: 1px solid rgba(255,255,255,0.2);
-                    border-radius: 8px;
+                    border-radius: 6px;
                     color: white;
-                    padding: 8px 12px;
+                    padding: 6px 10px;
                     font-size: 14px;
-                    width: 90px;
-                    font-weight: 600;
-                }
-
-                input[type="number"]:focus, input[type="range"]:focus {
-                    outline: none;
-                    border-color: rgba(255,255,255,0.4);
-                    background: rgba(0,0,0,0.3);
-                }
-
-                input[type="range"] {
-                    width: 130px;
-                    padding: 0;
-                    height: 6px;
-                }
-
-                .range-value {
-                    font-size: 13px;
-                    margin-left: 10px;
-                    font-weight: 600;
+                    width: 60px;
                 }
 
                 .stats-section {
-                    background: rgba(0,0,0,0.25);
-                    padding: 16px;
-                    border-radius: 10px;
-                    border: 1px solid rgba(255,255,255,0.1);
+                    background: rgba(0,0,0,0.2);
+                    padding: 12px;
+                    border-radius: 8px;
                 }
 
                 .stat-item {
                     display: flex;
                     justify-content: space-between;
-                    margin: 8px 0;
-                    font-size: 14px;
-                }
-
-                .stat-label {
-                    font-weight: 500;
-                }
-
-                .stat-value {
-                    font-weight: 700;
-                    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-                }
-
-                .button-section {
-                    display: flex;
-                    gap: 12px;
+                    margin: 6px 0;
+                    font-size: 13px;
                 }
 
                 .btn {
-                    flex: 1;
-                    padding: 12px;
+                    width: 100%;
+                    padding: 10px;
                     border: none;
-                    border-radius: 10px;
-                    font-weight: 700;
+                    border-radius: 8px;
+                    font-weight: 600;
                     cursor: pointer;
-                    transition: all 0.2s;
                     font-size: 14px;
-                    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
                 }
 
-                .btn-primary {
+                .btn-reset {
                     background: rgba(255,255,255,0.2);
                     color: white;
-                    border: 1px solid rgba(255,255,255,0.3);
                 }
 
-                .btn-primary:hover {
+                .btn-reset:hover {
                     background: rgba(255,255,255,0.3);
-                    transform: translateY(-2px);
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                }
-
-                .btn-secondary {
-                    background: rgba(16, 185, 129, 0.5);
-                    color: white;
-                    border: 1px solid rgba(16, 185, 129, 0.7);
-                }
-
-                .btn-secondary:hover {
-                    background: rgba(16, 185, 129, 0.7);
-                    transform: translateY(-2px);
-                    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-                }
-
-                .panel-minimized .panel-content {
-                    display: none !important;
                 }
             `);
         },
 
         attachEventListeners: () => {
+            // 🔥 TRACK USER TYPING
+            document.addEventListener('keydown', () => {
+                STATE.lastUserActivity = Date.now();
+            });
+
+            document.addEventListener('input', () => {
+                STATE.lastUserActivity = Date.now();
+            });
+
+            // Toggles
             document.querySelectorAll('.toggle').forEach(toggle => {
                 toggle.addEventListener('click', (e) => {
                     const setting = e.currentTarget.dataset.setting;
                     CONFIG[setting] = !CONFIG[setting];
                     toggle.classList.toggle('active');
                     utils.saveConfig();
-                    ui.updateStatus(`${setting} ${CONFIG[setting] ? '✅' : '❌'}`);
-                    utils.log(`🔥 ${setting}:`, CONFIG[setting]);
+                    ui.updateStatus(setting + (CONFIG[setting] ? ' ON' : ' OFF'));
                 });
             });
 
+            // Settings
             document.getElementById('max-depth').addEventListener('change', (e) => {
                 CONFIG.maxDrillDepth = parseInt(e.target.value);
                 utils.saveConfig();
-                ui.updateStatus(`Max depth: ${CONFIG.maxDrillDepth}`);
             });
 
             document.getElementById('interval').addEventListener('change', (e) => {
                 CONFIG.drillInterval = parseFloat(e.target.value) * 1000;
                 utils.saveConfig();
-                ui.updateStatus(`Interval: ${e.target.value}s`);
             });
 
-            document.getElementById('typing-speed').addEventListener('input', (e) => {
-                CONFIG.typingSpeed = parseInt(e.target.value);
-                document.querySelector('.range-value').textContent = CONFIG.typingSpeed + 'ms';
-                utils.saveConfig();
-            });
-
+            // Reset
             document.getElementById('reset-btn').addEventListener('click', () => {
                 STATE.drillCount = 0;
                 STATE.conversationHistory = [];
-                STATE.topicCache.clear();
                 STATE.lastResponseText = '';
                 ui.updateDrillCount(0);
-                ui.updateStatus('🔄 Reset complete');
-                utils.log('🔥 SESSION RESET');
+                ui.updateStatus('Reset');
             });
 
-            document.getElementById('export-btn').addEventListener('click', () => {
-                const data = {
-                    drillCount: STATE.drillCount,
-                    history: STATE.conversationHistory,
-                    config: CONFIG,
-                    timestamp: new Date().toISOString(),
-                    uptime: Date.now() - STATE.startTime
-                };
-                const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `nuclear-driller-session-${Date.now()}.json`;
-                a.click();
-                ui.updateStatus('💾 Exported!');
-                utils.log('🔥 SESSION EXPORTED');
-            });
-
-            // 🔥 FIXED MINIMIZE BUTTON
+            // 🔥 MINIMIZE BUTTON - SIMPLE VERSION
             document.getElementById('minimize-btn').addEventListener('click', () => {
                 const content = document.getElementById('panel-content');
                 const btn = document.getElementById('minimize-btn');
-                const panel = document.getElementById('perplexity-auto-driller-pro');
                 
-                // 🔥 FIX: Check both display AND classList
-                const isCurrentlyMinimized = panel.classList.contains('panel-minimized');
-                
-                if (isCurrentlyMinimized) {
-                    // Expand
+                if (content.style.display === 'none') {
                     content.style.display = 'block';
                     btn.textContent = '−';
-                    panel.classList.remove('panel-minimized');
                     CONFIG.minimized = false;
                 } else {
-                    // Minimize
                     content.style.display = 'none';
                     btn.textContent = '+';
-                    panel.classList.add('panel-minimized');
                     CONFIG.minimized = true;
                 }
                 
                 utils.saveConfig();
-                utils.log('🔥 Panel minimized:', CONFIG.minimized);
+            });
+
+            // Draggable
+            let isDragging = false;
+            let currentX, currentY, initialX, initialY;
+
+            const header = document.getElementById('panel-header');
+            header.addEventListener('mousedown', (e) => {
+                if (e.target.id === 'minimize-btn') return;
+                isDragging = true;
+                initialX = e.clientX - ui.panel.offsetLeft;
+                initialY = e.clientY - ui.panel.offsetTop;
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    e.preventDefault();
+                    currentX = e.clientX - initialX;
+                    currentY = e.clientY - initialY;
+                    ui.panel.style.left = currentX + 'px';
+                    ui.panel.style.top = currentY + 'px';
+                    ui.panel.style.right = 'auto';
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
             });
         },
 
@@ -1011,10 +637,7 @@
 
         updateStatus: (message) => {
             const el = document.getElementById('status');
-            if (el) {
-                el.textContent = message;
-                utils.log('🔥 Status:', message);
-            }
+            if (el) el.textContent = message;
         },
 
         startUptimeCounter: () => {
@@ -1026,35 +649,7 @@
         }
     };
 
-    /* ==========================================
-       MUTATION OBSERVER
-       ========================================== */
-    const observer = {
-        start: () => {
-            const obs = new MutationObserver((mutations) => {
-                if (CONFIG.autoApprove) {
-                    autoApprove.execute();
-                }
-            });
-
-            obs.observe(document.body, {
-                childList: true,
-                subtree: true,
-                attributes: false,
-                characterData: false
-            });
-
-            STATE.observers.push(obs);
-            utils.log('🔥 Mutation observer started');
-        }
-    };
-
-    /* ==========================================
-       INITIALIZATION
-       ========================================== */
     function init() {
-        utils.log('🔥🔥🔥 INITIALIZING NUCLEAR AUTO-DRILLER PRO v3.1 🔥🔥🔥');
-
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
             return;
@@ -1062,42 +657,25 @@
 
         setTimeout(() => {
             ui.create();
-            autoApprove.start();
-            drilling.start();
-            observer.start();
-            ui.updateStatus('🔥 NUCLEAR MODE ACTIVE');
-            utils.log('🔥 All systems operational');
-            utils.log('🔥 Auto-Drill is:', CONFIG.autoDrill ? 'ENABLED' : 'DISABLED');
-        }, 1500);
+            ui.updateStatus('Ready');
+            
+            // Auto-approve check
+            setInterval(() => {
+                if (CONFIG.autoApprove) {
+                    autoApprove.execute();
+                }
+            }, CONFIG.approveInterval);
+
+            // Drilling loop
+            setInterval(async () => {
+                if (CONFIG.autoDrill) {
+                    await drilling.submit();
+                }
+            }, CONFIG.drillInterval);
+
+        }, 1000);
     }
 
     init();
-
-    GM_registerMenuCommand('🔓 Toggle Auto-Approve', () => {
-        CONFIG.autoApprove = !CONFIG.autoApprove;
-        utils.saveConfig();
-        ui.updateStatus('Auto-approve ' + (CONFIG.autoApprove ? '✅' : '❌'));
-    });
-
-    GM_registerMenuCommand('🚀 Toggle Auto-Drill', () => {
-        CONFIG.autoDrill = !CONFIG.autoDrill;
-        utils.saveConfig();
-        ui.updateStatus('Auto-drill ' + (CONFIG.autoDrill ? '✅' : '❌'));
-    });
-
-    GM_registerMenuCommand('🔍 Toggle Debug Mode', () => {
-        CONFIG.debug = !CONFIG.debug;
-        utils.saveConfig();
-        console.log('🔥 Debug mode:', CONFIG.debug ? 'ENABLED' : 'DISABLED');
-    });
-
-    GM_registerMenuCommand('🔄 Reset Session', () => {
-        STATE.drillCount = 0;
-        STATE.conversationHistory = [];
-        STATE.topicCache.clear();
-        STATE.lastResponseText = '';
-        ui.updateDrillCount(0);
-        ui.updateStatus('🔄 Reset complete');
-    });
 
 })();
