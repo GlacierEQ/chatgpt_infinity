@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Perplexity Auto-Driller Pro - NUCLEAR Edition
+// @name         Perplexity Auto-Driller Pro - ACTUALLY FIXED
 // @namespace    https://github.com/GlacierEQ
-// @version      3.0.0
-// @description  FIXED: Actually minimizes, intelligently drills deeper, reliably auto-approves. No more bullshit.
+// @version      3.1.0
+// @description  REALLY FIXED: Minimize works properly, Auto-Drill enabled by default. Tested for real this time.
 // @author       GlacierEQ Team
 // @match        https://www.perplexity.ai/*
 // @grant        GM_setValue
@@ -23,14 +23,14 @@
     const CONFIG = {
         enabled: GM_getValue('enabled', true),
         autoApprove: GM_getValue('autoApprove', true),
-        autoDrill: GM_getValue('autoDrill', false),
+        autoDrill: GM_getValue('autoDrill', true), // 🔥 FIXED: NOW TRUE BY DEFAULT
         maxDrillDepth: GM_getValue('maxDrillDepth', 5),
         drillInterval: GM_getValue('drillInterval', 5000),
         approveInterval: GM_getValue('approveInterval', 200),
         intelligentMode: GM_getValue('intelligentMode', true),
         typingSpeed: GM_getValue('typingSpeed', 40),
-        debug: GM_getValue('debug', false),
-        minimized: GM_getValue('minimized', false) // 🔥 PERSISTENT MINIMIZE STATE
+        debug: GM_getValue('debug', true), // 🔥 ENABLE DEBUG BY DEFAULT
+        minimized: GM_getValue('minimized', false)
     };
 
     const STATE = {
@@ -44,7 +44,7 @@
         lastResponseText: ''
     };
 
-    // 🔥 NUCLEAR DRILL PATTERNS - WAY MORE DIVERSE
+    // 🔥 NUCLEAR DRILL PATTERNS
     const DRILL_PATTERNS = {
         deep_analysis: [
             "What are the fundamental principles underlying {topic}?",
@@ -121,7 +121,6 @@
                 return STATE.topicCache.get(text);
             }
 
-            // 🔥 SMARTER TOPIC EXTRACTION
             const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 20);
             if (sentences.length === 0) return 'this topic';
 
@@ -133,7 +132,6 @@
                 .split(/\s+/)
                 .filter(w => w.length > 3 && !stopWords.has(w));
 
-            // 🔥 FREQUENCY ANALYSIS FOR BETTER TOPIC DETECTION
             const wordFreq = {};
             allWords.forEach(word => {
                 wordFreq[word] = (wordFreq[word] || 0) + 1;
@@ -164,24 +162,21 @@
     };
 
     /* ==========================================
-       🔥 NUCLEAR DOM SELECTORS - MORE AGGRESSIVE
+       DOM SELECTORS
        ========================================== */
     const selectors = {
         approvalButtons: [
-            // Primary approval buttons
             'button[data-testid*="approval"]',
             'button[data-testid*="continue"]',
             'button[data-testid*="accept"]',
             'button[data-testid*="allow"]',
             'button[data-testid*="proceed"]',
-            // Aria labels
             'button[aria-label*="pprove" i]',
             'button[aria-label*="ontinue" i]',
             'button[aria-label*="llow" i]',
             'button[aria-label*="ccept" i]',
             'button[aria-label*="roceed" i]',
             'button[aria-label*="yes" i]',
-            // Text content matching
             'button:has-text("Approve")',
             'button:has-text("Continue")',
             'button:has-text("Yes")',
@@ -190,14 +185,11 @@
             'button:has-text("Proceed")',
             'button:has-text("OK")',
             'button:has-text("Confirm")',
-            // Role-based
             '[role="button"][aria-label*="continue" i]',
             '[role="button"][aria-label*="approve" i]',
-            // Class-based
             '.approval-btn',
             '.continue-btn',
             '.accept-btn',
-            // Generic buttons with positive actions
             'button.primary',
             'button.confirm'
         ],
@@ -282,7 +274,7 @@
                         return element;
                     }
                 } catch (e) {
-                    // Silently continue to next selector
+                    // Silently continue
                 }
             }
             return null;
@@ -323,12 +315,12 @@
     };
 
     /* ==========================================
-       🔥 NUCLEAR AUTO-APPROVAL SYSTEM
+       AUTO-APPROVAL SYSTEM
        ========================================== */
     const autoApprove = {
         clickedButtons: new WeakSet(),
         lastCheckTime: 0,
-        checkInterval: 150, // 🔥 FASTER CHECKING
+        checkInterval: 150,
 
         execute: () => {
             if (!CONFIG.autoApprove) return 0;
@@ -339,7 +331,6 @@
             }
             autoApprove.lastCheckTime = now;
 
-            // 🔥 FIND ALL POSSIBLE APPROVAL BUTTONS
             const buttons = dom.findAllElements(selectors.approvalButtons);
 
             let clickCount = 0;
@@ -367,14 +358,13 @@
     };
 
     /* ==========================================
-       🔥 NUCLEAR INTELLIGENT DRILLING SYSTEM
+       INTELLIGENT DRILLING SYSTEM
        ========================================== */
     const drilling = {
         getResponseText: () => {
             const contentEls = dom.findAllElements(selectors.responseContent);
             if (contentEls.length === 0) return '';
 
-            // Get the most recent response (last element)
             const latestContent = contentEls[contentEls.length - 1];
             const text = latestContent.textContent.trim();
 
@@ -405,7 +395,6 @@
                 .slice(-3)
                 .map(h => h.category);
 
-            // 🔥 AVOID REPEATING RECENT CATEGORIES
             const availableCategories = categories.filter(
                 cat => !usedCategories.includes(cat)
             );
@@ -438,7 +427,6 @@
                 question
             });
 
-            // 🔥 KEEP HISTORY MANAGEABLE
             if (STATE.conversationHistory.length > 50) {
                 STATE.conversationHistory = STATE.conversationHistory.slice(-25);
             }
@@ -453,14 +441,12 @@
 
             const isContentEditable = element.contentEditable === 'true';
 
-            // 🔥 CLEAR EXISTING CONTENT
             if (isContentEditable) {
                 element.textContent = '';
             } else {
                 element.value = '';
             }
 
-            // 🔥 TYPE CHARACTER BY CHARACTER WITH REALISTIC DELAYS
             for (let i = 0; i < text.length; i++) {
                 const char = text[i];
 
@@ -470,14 +456,12 @@
                     element.value += char;
                 }
 
-                // Trigger all necessary events
                 element.dispatchEvent(new Event('input', { bubbles: true }));
                 element.dispatchEvent(new Event('change', { bubbles: true }));
                 element.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: char }));
                 element.dispatchEvent(new KeyboardEvent('keypress', { bubbles: true, key: char }));
                 element.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: char }));
 
-                // 🔥 VARIABLE TYPING SPEED FOR MORE HUMAN-LIKE BEHAVIOR
                 const delay = utils.randomDelay(
                     CONFIG.typingSpeed - 20,
                     CONFIG.typingSpeed + 30
@@ -485,7 +469,6 @@
                 await utils.sleep(delay);
             }
 
-            // 🔥 FINAL EVENTS TO TRIGGER ANY LISTENERS
             element.dispatchEvent(new Event('input', { bubbles: true }));
             element.dispatchEvent(new Event('change', { bubbles: true }));
             await utils.sleep(200);
@@ -515,7 +498,6 @@
                 return false;
             }
 
-            // 🔥 ONLY DRILL IF THERE'S A NEW RESPONSE
             if (!drilling.hasNewResponse()) {
                 utils.log('🔥 No new response to drill into');
                 return false;
@@ -577,7 +559,7 @@
     };
 
     /* ==========================================
-       🔥 NUCLEAR UI SYSTEM WITH PERSISTENT MINIMIZE
+       UI SYSTEM
        ========================================== */
     const ui = {
         panel: null,
@@ -585,17 +567,17 @@
         create: () => {
             const panel = document.createElement('div');
             panel.id = 'perplexity-auto-driller-pro';
-            panel.className = CONFIG.minimized ? 'panel-minimized' : ''; // 🔥 RESTORE STATE
+            panel.className = CONFIG.minimized ? 'panel-minimized' : '';
             panel.innerHTML = `
                 <div class="panel-header">
                     <div class="panel-title">
                         <span class="icon">🔥</span>
                         <span>NUCLEAR Driller</span>
-                        <span class="version">v3.0</span>
+                        <span class="version">v3.1</span>
                     </div>
                     <button class="minimize-btn" id="minimize-btn">${CONFIG.minimized ? '+' : '−'}</button>
                 </div>
-                <div class="panel-content" id="panel-content" style="${CONFIG.minimized ? 'display: none;' : ''}">
+                <div class="panel-content" id="panel-content">
                     <div class="control-section">
                         <div class="control-row">
                             <span class="label">🔓 Auto-Approve</span>
@@ -660,6 +642,20 @@
             ui.attachStyles();
             ui.attachEventListeners();
             ui.startUptimeCounter();
+            ui.applyMinimizeState(); // 🔥 APPLY INITIAL STATE
+        },
+
+        applyMinimizeState: () => {
+            const content = document.getElementById('panel-content');
+            const panel = document.getElementById('perplexity-auto-driller-pro');
+            
+            if (CONFIG.minimized) {
+                content.style.display = 'none';
+                panel.classList.add('panel-minimized');
+            } else {
+                content.style.display = 'block';
+                panel.classList.remove('panel-minimized');
+            }
         },
 
         attachStyles: () => {
@@ -923,7 +919,6 @@
         },
 
         attachEventListeners: () => {
-            // 🔥 TOGGLE CONTROLS
             document.querySelectorAll('.toggle').forEach(toggle => {
                 toggle.addEventListener('click', (e) => {
                     const setting = e.currentTarget.dataset.setting;
@@ -935,7 +930,6 @@
                 });
             });
 
-            // 🔥 SETTINGS INPUTS
             document.getElementById('max-depth').addEventListener('change', (e) => {
                 CONFIG.maxDrillDepth = parseInt(e.target.value);
                 utils.saveConfig();
@@ -954,7 +948,6 @@
                 utils.saveConfig();
             });
 
-            // 🔥 RESET BUTTON
             document.getElementById('reset-btn').addEventListener('click', () => {
                 STATE.drillCount = 0;
                 STATE.conversationHistory = [];
@@ -965,7 +958,6 @@
                 utils.log('🔥 SESSION RESET');
             });
 
-            // 🔥 EXPORT BUTTON
             document.getElementById('export-btn').addEventListener('click', () => {
                 const data = {
                     drillCount: STATE.drillCount,
@@ -984,24 +976,29 @@
                 utils.log('🔥 SESSION EXPORTED');
             });
 
-            // 🔥 MINIMIZE BUTTON WITH PERSISTENT STATE
+            // 🔥 FIXED MINIMIZE BUTTON
             document.getElementById('minimize-btn').addEventListener('click', () => {
                 const content = document.getElementById('panel-content');
                 const btn = document.getElementById('minimize-btn');
                 const panel = document.getElementById('perplexity-auto-driller-pro');
                 
-                const isMinimized = content.style.display === 'none';
-                content.style.display = isMinimized ? 'block' : 'none';
-                btn.textContent = isMinimized ? '−' : '+';
+                // 🔥 FIX: Check both display AND classList
+                const isCurrentlyMinimized = panel.classList.contains('panel-minimized');
                 
-                if (isMinimized) {
+                if (isCurrentlyMinimized) {
+                    // Expand
+                    content.style.display = 'block';
+                    btn.textContent = '−';
                     panel.classList.remove('panel-minimized');
+                    CONFIG.minimized = false;
                 } else {
+                    // Minimize
+                    content.style.display = 'none';
+                    btn.textContent = '+';
                     panel.classList.add('panel-minimized');
+                    CONFIG.minimized = true;
                 }
                 
-                // 🔥 SAVE MINIMIZE STATE
-                CONFIG.minimized = !isMinimized;
                 utils.saveConfig();
                 utils.log('🔥 Panel minimized:', CONFIG.minimized);
             });
@@ -1030,7 +1027,7 @@
     };
 
     /* ==========================================
-       🔥 NUCLEAR MUTATION OBSERVER
+       MUTATION OBSERVER
        ========================================== */
     const observer = {
         start: () => {
@@ -1043,7 +1040,7 @@
             obs.observe(document.body, {
                 childList: true,
                 subtree: true,
-                attributes: false, // 🔥 IGNORE ATTRIBUTE CHANGES FOR PERFORMANCE
+                attributes: false,
                 characterData: false
             });
 
@@ -1053,10 +1050,10 @@
     };
 
     /* ==========================================
-       🔥 NUCLEAR INITIALIZATION
+       INITIALIZATION
        ========================================== */
     function init() {
-        utils.log('🔥🔥🔥 INITIALIZING NUCLEAR AUTO-DRILLER PRO v3.0 🔥🔥🔥');
+        utils.log('🔥🔥🔥 INITIALIZING NUCLEAR AUTO-DRILLER PRO v3.1 🔥🔥🔥');
 
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
@@ -1070,12 +1067,12 @@
             observer.start();
             ui.updateStatus('🔥 NUCLEAR MODE ACTIVE');
             utils.log('🔥 All systems operational');
+            utils.log('🔥 Auto-Drill is:', CONFIG.autoDrill ? 'ENABLED' : 'DISABLED');
         }, 1500);
     }
 
     init();
 
-    // 🔥 MENU COMMANDS
     GM_registerMenuCommand('🔓 Toggle Auto-Approve', () => {
         CONFIG.autoApprove = !CONFIG.autoApprove;
         utils.saveConfig();
@@ -1101,16 +1098,6 @@
         STATE.lastResponseText = '';
         ui.updateDrillCount(0);
         ui.updateStatus('🔄 Reset complete');
-    });
-
-    GM_registerMenuCommand('💾 Export Session', () => {
-        const data = {
-            drillCount: STATE.drillCount,
-            history: STATE.conversationHistory,
-            config: CONFIG,
-            timestamp: new Date().toISOString()
-        };
-        console.log('🔥 SESSION DATA:', data);
     });
 
 })();
