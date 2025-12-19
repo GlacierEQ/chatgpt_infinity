@@ -5,14 +5,33 @@
 [![GitHub](https://img.shields.io/badge/GitHub-GlacierEQ-blue?logo=github)](https://github.com/GlacierEQ/chatgpt_infinity)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platforms-5%20Supported-orange)](https://www.tampermonkey.net/)
-[![Version](https://img.shields.io/badge/Version-2.0.2-red)](https://github.com/GlacierEQ/chatgpt_infinity/releases)
-[![Code](https://img.shields.io/badge/Code-4%2C363%20lines-purple)](https://github.com/GlacierEQ/chatgpt_infinity)
+[![Version](https://img.shields.io/badge/Version-2.1.0-red)](https://github.com/GlacierEQ/chatgpt_infinity/releases)
+[![Code](https://img.shields.io/badge/Code-5%2C777%20lines-purple)](https://github.com/GlacierEQ/chatgpt_infinity)
 
 **The Ultimate AI Automation Suite** - Intelligent drilling, auto-continue, and context-aware interactions across **all 5 major AI platforms**.
 
-[Installation](#-quick-start) • [Platforms](#-platform-coverage) • [Features](https://github.com/GlacierEQ/chatgpt_infinity#-chatgpt-auto-driller-pro) • [Documentation](#-documentation) • [Roadmap](#-roadmap)
+[Installation](#-quick-start) • [Master Control](#-new-master-orchestrator-v210) • [Platforms](#-platform-coverage) • [Features](#-features) • [Documentation](#-documentation)
 
 </div>
+
+---
+
+## 🌟 **NEW: Master Orchestrator (v2.1.0)**
+
+> **🚀 One Script for All Platforms!** The Master Orchestrator provides unified automation control across ChatGPT, Perplexity, Claude, Notion, and Gemini.
+
+### ⚡ Coming Soon: Universal Control Panel
+
+We're developing the **Master Orchestrator** - a revolutionary single script that:
+- ✅ Auto-detects which AI platform you're using
+- ✅ Provides unified control panel across all platforms
+- ✅ Syncs settings and analytics everywhere
+- ✅ Universal keyboard shortcuts
+- ✅ Adaptive theming for each platform
+
+**Status:** In development | **Release:** v2.1.0
+
+Meanwhile, use our **battle-tested individual scripts** below! ⬇️
 
 ---
 
